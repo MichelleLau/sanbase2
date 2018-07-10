@@ -19,6 +19,10 @@ config :sanbase, Sanbase.Repo,
   # closest to real case as there are 3 pods with 10 connections each
   pool_size: 30
 
+config :sanbase, Sanbase.ClickhouseRepo,
+  pool: Ecto.Adapters.SQL.Sanbox,
+  database: "default_test"
+
 config :sanbase, Sanbase.Auth.Hmac, secret_key: "Non_empty_key_used_in_tests_only"
 
 config :sanbase, Sanbase.ExternalServices.Coinmarketcap, sync_enabled: false
