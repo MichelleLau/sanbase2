@@ -22,7 +22,7 @@ defmodule Sanbase.Application do
         supervisor(SanbaseWeb.Endpoint, []),
 
         # Start the Clickhouse Repo
-        # {Sanbase.ClickhouseRepo, []},
+        {Sanbase.ClickhouseRepo, []},
         # supervisor(Sanbase.ClickhouseRepo, []),
 
         # Start a Registry

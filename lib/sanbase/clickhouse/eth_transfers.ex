@@ -8,7 +8,6 @@ defmodule Sanbase.Clickhouse.EthTransfers do
     field(:to, :string)
     field(:value, :float)
     field(:blockNumber, :integer)
-    field(:timestamp, :integer)
     field(:transactionHash, :string)
     field(:transactionPosition, :integer)
   end
