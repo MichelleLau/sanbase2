@@ -6,6 +6,6 @@ defmodule Sanbase.ClickhouseRepo do
   DATABASE_URL environment variable.
   """
   def init(_, opts) do
-    {:ok, opts}
+    {:ok, Keyword.put(opts, :url, System.get_env("CLICKHOUSE_DATABASE_URL"))}
   end
 end
