@@ -54,6 +54,15 @@ config :sanbase, Sanbase.Repo,
   database: "sanbase_dev",
   hostname: "localhost"
 
+config :sanbase, Sanbase.ClickhouseRepo,
+  pool: Ecto.Adapters.SQL.Sandbox,
+  adapter: Ecto.Adapters.Postgres,
+  database: "clickhouse_test",
+  hostname: "localhost",
+  port: 5432,
+  username: "postgres",
+  password: "postgres"
+
 config :ex_admin,
   basic_auth: [
     username: "admin",

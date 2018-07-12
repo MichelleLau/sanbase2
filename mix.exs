@@ -10,7 +10,7 @@ defmodule Sanbase.Mixfile do
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
-      aliases: aliases(),
+      aliases: aliases() ++ env_dependent_aliases(Mix.env()),
       deps: deps(),
       test_coverage: [
         tool: ExCoveralls
@@ -107,8 +107,19 @@ defmodule Sanbase.Mixfile do
       "ecto.setup": ["load_dotenv", "ecto.create", "ecto.load", "run priv/repo/seeds.exs"],
       "ecto.reset": ["load_dotenv", "ecto.drop", "ecto.setup"],
       "ecto.migrate": ["load_dotenv", "ecto.migrate -r Sanbase.Repo", "ecto.dump"],
-      "ecto.rollback": ["load_dotenv", "ecto.rollback", "ecto.dump"],
+      "ecto.rollback": ["load_dotenv", "ecto.rollback", "ecto.dump"]
+    ]
+  end
+
+  defp env_dependent_aliases(:prod) do
+    [
       test: ["load_dotenv", "ecto.create --quiet", "ecto.load", "test"]
+    ]
+  end
+
+  defp env_dependent_aliases(_) do
+    [
+      test: ["load_dotenv", "ecto.create --quiet", "ecto.load", "test --exclude run_only_prod"]
     ]
   end
 end
