@@ -1,12 +1,17 @@
 defmodule Sanbase.Clickhouse.EthDailyActiveAddresses do
+  @moduledoc ~s"""
+  Uses ClickHouse to calculate the daily active addresses for ETH
+  """
+
   use Ecto.Schema
 
   import Ecto.Query
+  import Sanbase.Clickhouse.EctoFunctions
+
   alias Sanbase.ClickhouseRepo
   alias __MODULE__
 
-  # @timestamps_opts updated_at: false
-
+  @timestamps_opts updated_at: false
   @primary_key false
   schema "eth_daily_active_addresses" do
     field(:dt, :utc_datetime, primary_key: true)
@@ -26,6 +31,6 @@ defmodule Sanbase.Clickhouse.EthDailyActiveAddresses do
       order_by: daa.dt,
       select: {daa.dt, count("*")}
     )
-    |> ClickhouseRepo.all()
+    |> query_all_use_prewhere()
   end
 end

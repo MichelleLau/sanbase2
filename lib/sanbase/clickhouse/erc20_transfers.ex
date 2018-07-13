@@ -1,7 +1,12 @@
 defmodule Sanbase.Clickhouse.Erc20Transfers do
+  @moduledoc ~s"""
+  Uses ClickHouse to work with ERC20 transfers.
+  """
   use Ecto.Schema
 
   import Ecto.Query
+  import Sanbase.Clickhouse.EctoFunctions
+
   alias Sanbase.ClickhouseRepo
   alias __MODULE__
 
@@ -22,6 +27,11 @@ defmodule Sanbase.Clickhouse.Erc20Transfers do
     raise "Should not try to change eth daily active addresses"
   end
 
+  @doc ~s"""
+  Return the `size` biggest transaction for a given contract and time period.
+  If the top transactions for SAN token are needed, the SAN contract address must be
+  provided as a first argument.
+  """
   def top_contract_transfers(contract, from_datetime, to_datetime, size \\ 10) do
     from(
       transfer in Erc20Transfers,
@@ -31,7 +41,7 @@ defmodule Sanbase.Clickhouse.Erc20Transfers do
       order_by: [desc: transfer.value],
       limit: ^size
     )
-    |> ClickhouseRepo.all()
+    |> query_all_use_prewhere()
   end
 
   def count_contract_transfers(contract, from_datetime, to_datetime) do
@@ -42,15 +52,6 @@ defmodule Sanbase.Clickhouse.Erc20Transfers do
           transfer.dt < ^to_datetime,
       select: count("*")
     )
-    |> ClickhouseRepo.all()
-  end
-
-  def count_contract_transfers_chunked(contract, from_datetime, to_datetime, interval) do
-    from(
-      transfer in Erc20Transfers,
-      where:
-        transfer.contract == ^contract and transfer.dt > ^from_datetime and
-          transfer.dt < ^to_datetime
-    )
+    |> query_all_use_prewhere()
   end
 end

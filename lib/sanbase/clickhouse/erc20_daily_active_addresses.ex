@@ -1,7 +1,13 @@
 defmodule Sanbase.Clickhouse.Erc20DailyActiveAddresses do
+  @moduledoc ~s"""
+  Uses ClickHouse to calculate the daily active addresses for an ERC20 token
+  """
+
   use Ecto.Schema
 
   import Ecto.Query
+  import Sanbase.Clickhouse.EctoFunctions
+
   alias Sanbase.ClickhouseRepo
   alias __MODULE__
 
@@ -26,6 +32,6 @@ defmodule Sanbase.Clickhouse.Erc20DailyActiveAddresses do
       order_by: daa.dt,
       select: {daa.dt, count("*")}
     )
-    |> ClickhouseRepo.all()
+    |> query_all_use_prewhere()
   end
 end

@@ -1,4 +1,8 @@
 defmodule Sanbase.Clickhouse.Erc20TransactionVolume do
+  @moduledoc ~s"""
+  Uses ClickHouse to calculate the transaction volume for an ERC20 token
+
+  """
   use Ecto.Schema
 
   import Ecto.Query
@@ -16,16 +20,5 @@ defmodule Sanbase.Clickhouse.Erc20TransactionVolume do
 
   def changeset(_, _attrs \\ %{}) do
     raise "Should not try to change eth daily active addresses"
-  end
-
-  def count_erc20_daa(contract, from_datetime, to_datetime) do
-    from(
-      daa in Erc20TransactionVolume,
-      where: daa.contract == ^contract and daa.dt > ^from_datetime and daa.dt < ^to_datetime,
-      select: {daa.dt, count("*")},
-      group_by: daa.dt,
-      order_by: daa.dt
-    )
-    |> ClickhouseRepo.all()
   end
 end
