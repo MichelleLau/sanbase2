@@ -1,5 +1,6 @@
 defmodule SanbaseWeb.Graphql.Helpers.Utils do
   alias Sanbase.DateTimeUtils
+  alias Sanbase.Model.Project
 
   import Ecto.Query
 
@@ -79,6 +80,22 @@ defmodule SanbaseWeb.Graphql.Helpers.Utils do
       select: p.ticker
     )
     |> Sanbase.Repo.one()
+  end
+
+  def project_to_contract_info(%Project{
+        main_contract_address: main_contract_address,
+        token_decimals: token_decimals
+      })
+      when not is_nil(main_contract_address) do
+    {:ok, String.downcase(main_contract_address), token_decimals || 0}
+  end
+
+  def project_to_contract_info(%Project{coinmarketcap_id: nil, id: id}) do
+    {:error, "Can't find contract address of project with id #{id}"}
+  end
+
+  def project_to_contract_info(%Project{coinmarketcap_id: cmc_id}) do
+    {:error, "Can't find contract address of project #{cmc_id}"}
   end
 
   # Private functions

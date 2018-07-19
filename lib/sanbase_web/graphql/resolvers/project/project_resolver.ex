@@ -128,6 +128,28 @@ defmodule SanbaseWeb.Graphql.Resolvers.ProjectResolver do
     end
   end
 
+  def token_top_transfers(%Project{} = project, %{from: from, to: to, size: size}, resolution) do
+    # Cannot get more than the top 30 transactions
+    with {:ok, contract_address, _token_decimals} <- Utils.project_to_contract_info(project),
+         size <- Enum.max([size, 30]) do
+      async(
+        Cache.func(fn ->
+          Sanbase.Clickhouse.Erc20Transfers.top_contract_transfers(
+            contract_address,
+            from,
+            to,
+            size
+          )
+        end)
+      )
+    else
+      error ->
+        Logger.error("Cannot get token top transfers. Reason: #{inspect(error)}")
+
+        {:ok, []}
+    end
+  end
+
   def all_projects_with_eth_contract_info(_parent, _args, _resolution) do
     query = Project.all_projects_with_eth_contract_query()
 
