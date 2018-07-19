@@ -59,6 +59,7 @@ defmodule Sanbase.Mixfile do
       {:hammer, "~> 5.0"},
       {:ex_admin, github: "santiment/ex_admin", branch: "master"},
       {:basic_auth, "~> 2.2"},
+      {:mock, "~> 0.3"},
       {:mockery, "~> 2.2"},
       {:distillery, "~> 1.5", runtime: false},
       {:timex, "~> 3.0"},
