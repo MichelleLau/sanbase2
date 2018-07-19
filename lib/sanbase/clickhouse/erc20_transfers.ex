@@ -32,7 +32,7 @@ defmodule Sanbase.Clickhouse.Erc20Transfers do
   If the top transactions for SAN token are needed, the SAN contract address must be
   provided as a first argument.
   """
-  def top_contract_transfers(contract, from_datetime, to_datetime, size \\ 10) do
+  def token_top_transfers(contract, from_datetime, to_datetime, size \\ 10) do
     from(
       transfer in Erc20Transfers,
       where:

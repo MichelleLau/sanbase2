@@ -209,9 +209,9 @@ defmodule SanbaseWeb.Graphql.ProjectTypes do
     field :token_top_transfers, list_of(:transaction) do
       arg(:from, non_null(:datetime))
       arg(:to, non_null(:datetime))
-      arg(:limit, :integer, default_value: 10)
+      arg(:size, :integer, default_value: 10)
 
-      cache_resolve_async(&ProjectResolver.token_top_transfers/3)
+      cache_resolve(&ProjectResolver.token_top_transfers/3)
     end
 
     @desc "Average daily active addresses for a ERC20 project and given time period"

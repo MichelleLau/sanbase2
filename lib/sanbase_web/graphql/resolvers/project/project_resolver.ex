@@ -23,10 +23,9 @@ defmodule SanbaseWeb.Graphql.Resolvers.ProjectResolver do
     ExternalServices.Etherscan
   }
 
-  alias SanbaseWeb.Graphql.Helpers.Cache
-
-  alias SanbaseWeb.Graphql.Resolvers.ProjectBalanceResolver
   alias Sanbase.Repo
+  alias SanbaseWeb.Graphql.Helpers.{Cache, Utils}
+  alias SanbaseWeb.Graphql.Resolvers.ProjectBalanceResolver
 
   def all_projects(_parent, args, _resolution, only_project_transparency \\ nil) do
     only_project_transparency =
@@ -128,23 +127,30 @@ defmodule SanbaseWeb.Graphql.Resolvers.ProjectResolver do
     end
   end
 
-  def token_top_transfers(%Project{} = project, %{from: from, to: to, size: size}, resolution) do
+  def token_top_transfers(%Project{} = project, %{from: from, to: to, size: size}, _resolution) do
     # Cannot get more than the top 30 transactions
-    with {:ok, contract_address, _token_decimals} <- Utils.project_to_contract_info(project),
+    with {:ok, contract_address, token_decimals} <- Utils.project_to_contract_info(project),
          size <- Enum.max([size, 30]) do
       async(
-        Cache.func(fn ->
-          Sanbase.Clickhouse.Erc20Transfers.top_contract_transfers(
-            contract_address,
-            from,
-            to,
-            size
-          )
-        end)
+        Cache.func(
+          fn ->
+            result =
+              Sanbase.Clickhouse.Erc20Transfers.token_top_transfers(
+                contract_address,
+                from,
+                to,
+                size
+              )
+              |> Enum.map(&transaction_struct_to_gql_type(&1, token_decimals))
+
+            {:ok, result}
+          end,
+          :token_top_transfers
+        )
       )
     else
       error ->
-        Logger.error("Cannot get token top transfers. Reason: #{inspect(error)}")
+        Logger.info("Cannot get token top transfers. Reason: #{inspect(error)}")
 
         {:ok, []}
     end
@@ -662,5 +668,24 @@ defmodule SanbaseWeb.Graphql.Resolvers.ProjectResolver do
       )
 
     {:ok, Repo.all(query)}
+  end
+
+  defp transaction_struct_to_gql_type(
+         %Sanbase.Clickhouse.Erc20Transfers{
+           dt: datetime,
+           from: from,
+           to: to,
+           transactionHash: trx_hash,
+           value: value
+         },
+         token_decimals
+       ) do
+    %{
+      datetime: datetime,
+      trx_hash: trx_hash,
+      trx_value: value / :math.pow(10, token_decimals),
+      from_address: from,
+      to_address: to
+    }
   end
 end
