@@ -1,26 +1,21 @@
 import React from 'react'
 import moment from 'moment'
 import { graphql } from 'react-apollo'
-import { Bar, Line } from 'react-chartjs-2'
+import { Line } from 'react-chartjs-2'
 import { totalMarketcapGQL } from './TotalMarketcapGQL'
 import { formatNumber } from '../../utils/formatting'
 import './TotalMarketcapWidget.css'
 
-/*
-  marketcap = int;
-  datetime: string
-*/
-
 const charOptions = {
-  responsive: true,
-  showTooltips: true,
-  pointDot: false,
-  scaleShowLabels: false,
-  pointHitDetectionRadius: 1,
-  datasetFill: false,
-  scaleFontSize: 0,
   animation: false,
+  maintainAspectRatio: true,
+  responsive: true,
   pointRadius: 0,
+  layout: {
+    padding: {
+      left: -10
+    }
+  },
   legend: {
     display: false
   },
@@ -30,10 +25,6 @@ const charOptions = {
       hoverRadius: 1,
       radius: 0
     }
-  },
-  hover: {
-    mode: 'point',
-    intersect: false
   },
   tooltips: {
     mode: 'x',
@@ -53,19 +44,19 @@ const charOptions = {
       title: item => {
         return moment(item[0].xLabel).format('dddd, MMM DD YYYY, HH:mm:ss UTC')
       },
-      label: (tooltipItem, data) => {
-        console.log(data, tooltipItem)
-        // formatNumber(data.datasets[tooltipItem.datasetIndex], {
-        // currency: 'USD'
-        // }
-        // )
-      }
+      label: tooltipItem =>
+        formatNumber(tooltipItem.yLabel, {
+          currency: 'USD'
+        })
     }
   },
   scales: {
     yAxes: [
       {
         ticks: {
+          display: false
+        },
+        gridLines: {
           display: false
         }
       }
@@ -74,6 +65,9 @@ const charOptions = {
       {
         ticks: {
           display: false
+        },
+        gridLines: {
+          display: false
         }
       }
     ]
@@ -81,14 +75,33 @@ const charOptions = {
 }
 
 const options = {
-  type: 'line',
   borderColor: 'rgba(45, 94, 57, 1)',
-  // borderJoinStyle: 'round',
-  // borderCapStyle: 'square',
   borderWidth: 1,
   lineTension: 0.1,
   pointBorderWidth: 1,
   backgroundColor: 'rgba(214, 235, 219, .8)'
+}
+
+const calculate24HourVolumeAmplitude = historyPrice => {
+  if (!historyPrice) return 'No data'
+
+  const oneDayAgo = moment().subtract(1, 'days')
+  const historyPriceLastItemIndex = historyPrice.length - 1
+
+  if (
+    moment(historyPrice[historyPriceLastItemIndex].datetime).isBefore(oneDayAgo)
+  ) {
+    return 'Data is too old'
+  }
+
+  for (let i = historyPriceLastItemIndex - 1; i >= 0; i--) {
+    if (moment(historyPrice[i].datetime).isBefore(oneDayAgo)) {
+      return (
+        historyPrice[historyPriceLastItemIndex + 1].volume -
+        historyPrice[historyPriceLastItemIndex].volume
+      )
+    }
+  }
 }
 
 const TotalMarketcapWidget = ({ data: { historyPrice = false } }) => {
@@ -105,18 +118,41 @@ const TotalMarketcapWidget = ({ data: { historyPrice = false } }) => {
     ]
   }
 
+  const volumeAmplitude = calculate24HourVolumeAmplitude(historyPrice)
+
+  const volumePrice =
+    typeof volumeAmplitude === 'string'
+      ? volumeAmplitude
+      : formatNumber(volumeAmplitude, {
+        currency: 'USD'
+      })
+
+  const totalmarketCapPrice = formatNumber(
+    historyPrice && historyPrice[historyPrice.length - 1].marketcap,
+    {
+      currency: 'USD'
+    }
+  )
+
   return (
     <div className='TotalMarketcapWidget'>
-      <h3 className='TotalMarketcapWidget__label'>Total marketcap</h3>
-      <h4 className='TotalMarketcapWidget__value'>
-        {formatNumber(
-          historyPrice && historyPrice[historyPrice.length - 1].marketcap,
-          {
-            currency: 'USD'
-          }
-        )}
-      </h4>
-      {historyPrice && <Bar data={marketcapDataset} options={charOptions} />}
+      <div className='TotalMarketcapWidget__info'>
+        <div className='TotalMarketcapWidget__left'>
+          <h3 className='TotalMarketcapWidget__label'>Total marketcap</h3>
+          <h4 className='TotalMarketcapWidget__value'>{totalmarketCapPrice}</h4>
+        </div>
+        <div className='TotalMarketcapWidget__right'>
+          <h3 className='TotalMarketcapWidget__label'>Vol 24 hr</h3>
+          <h4 className='TotalMarketcapWidget__value'>{volumePrice}</h4>
+        </div>
+      </div>
+      {historyPrice && (
+        <Line
+          data={marketcapDataset}
+          options={charOptions}
+          className='TotalMarketcapWidget__chart'
+        />
+      )}
     </div>
   )
 }
@@ -126,7 +162,10 @@ const ApolloTotalMarketcapWidget = graphql(totalMarketcapGQL)(
 )
 
 ApolloTotalMarketcapWidget.defaultProps = {
-  from: moment().subtract(3, 'months').utc().format(),
+  from: moment()
+    .subtract(3, 'months')
+    .utc()
+    .format(),
   slug: 'TOTAL_MARKET'
 }
 

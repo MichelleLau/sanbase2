@@ -1,12 +1,33 @@
 .TotalMarketcapWidget {
   max-width: 300px;
+  margin: 10px;
+}
+
+.TotalMarketcapWidget__right {
+  text-align: right;
+}
+
+.TotalMarketcapWidget__info {
+  display: flex;
+  justify-content: space-between;
 }
 
 .TotalMarketcapWidget__label {
   color: #555;
+  text-transform: uppercase;
+  /* font-weight: bold; */
+  font-size: 1rem;
+  margin: 0 0 5px 0;
 }
 
 .TotalMarketcapWidget__value {
   color: #000;
-  font-size: 24px;
+  font-size: 1.3rem;
+  margin: 0;
+  font-weight: bold;
+}
+
+.TotalMarketcapWidget canvas {
+  margin-top: 20px;
+  /* max-height: 100px; */
 }
