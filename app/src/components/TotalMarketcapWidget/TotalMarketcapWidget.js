@@ -104,9 +104,7 @@ const calculate24HourVolumeAmplitude = historyPrice => {
   }
 }
 
-const TotalMarketcapWidget = ({ data: { historyPrice = false } }) => {
-  console.log(historyPrice)
-
+const TotalMarketcapWidget = ({ data: { historyPrice } }) => {
   const marketcapDataset = {
     labels: historyPrice && historyPrice.map(data => data.datetime),
     datasets: [
@@ -127,12 +125,11 @@ const TotalMarketcapWidget = ({ data: { historyPrice = false } }) => {
         currency: 'USD'
       })
 
-  const totalmarketCapPrice = formatNumber(
-    historyPrice && historyPrice[historyPrice.length - 1].marketcap,
-    {
+  const totalmarketCapPrice =
+    historyPrice &&
+    formatNumber(historyPrice[historyPrice.length - 1].marketcap, {
       currency: 'USD'
-    }
-  )
+    })
 
   return (
     <div className='TotalMarketcapWidget'>
