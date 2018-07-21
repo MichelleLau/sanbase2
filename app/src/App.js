@@ -31,6 +31,7 @@ import FeedbackModal from './components/FeedbackModal.js'
 import GDPRModal from './components/GDPRModal.js'
 import ApiDocs from './components/ApiDocs'
 import ApiExplorer from './components/ApiExplorer'
+import TotalMarketcapWidget from './components/TotalMarketcapWidget/TotalMarketcapWidget'
 import './App.css'
 
 const LoadableDetailedPage = Loadable({
@@ -85,6 +86,7 @@ export const App = ({
         OFFLINE
       </FadeInDown>
     )}
+    <TotalMarketcapWidget />
     {isLoggedIn &&
       !hasUsername && (
         <div className='no-username-status-message'>

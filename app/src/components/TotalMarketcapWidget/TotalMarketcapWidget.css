@@ -1,0 +1,12 @@
+.TotalMarketcapWidget {
+  max-width: 300px;
+}
+
+.TotalMarketcapWidget__label {
+  color: #555;
+}
+
+.TotalMarketcapWidget__value {
+  color: #000;
+  font-size: 24px;
+}

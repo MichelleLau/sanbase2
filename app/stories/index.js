@@ -11,3 +11,5 @@ import './ProjectsStory.js'
 import './InsightsStory.js'
 import './HelpPopupStory.js'
 import './MenuStory.js'
+import './TotalMarketcapWidget.js'
+//
